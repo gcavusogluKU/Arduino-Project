@@ -5,6 +5,7 @@
 #include <MQ135.h>
 
 #define SEALEVELPRESSURE_HPA (1013.25)
+#define humidityPin A3
 
 Adafruit_BME280 bme;
 MQ135 mq135_sensor(A2);
@@ -12,6 +13,7 @@ MQ135 mq135_sensor(A2);
 unsigned long delayTime;
 float temperature, humidity, pressure, altitude;
 float rzero, correctedRZero, resistance, ppm, correctedPPM;
+float soilHumidity;
 
 void setup() {
   Serial.begin(9600);
@@ -19,12 +21,13 @@ void setup() {
 
   unsigned status = bme.begin(0x76);
   Serial.print("SensorID was: 0x");
-   Serial.println(bme.sensorID(), 16);
+  Serial.println(bme.sensorID(), 16);
 
   if (!status) {
     Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
     while (1) delay(10);
   }
+  pinMode(humidityPin,INPUT);
 
   Serial.println("-- Default Test --");
   delayTime = 1000;
@@ -50,19 +53,24 @@ void readValues() {
   resistance = mq135_sensor.getResistance();
   ppm = mq135_sensor.getPPM();
   correctedPPM = mq135_sensor.getCorrectedPPM(temperature, humidity);
+
+  soilHumidity = (float)(1023 - analogRead(humidityPin))/1024*100;
 }
 
 void printValues() {
-  Serial.print("T = " + String(temperature) + " °C | ");
-  Serial.print("P = " + String(pressure) + " hPa | ");
-  Serial.print("Altitude = " + String(altitude) + " m | ");
-  Serial.print("Humidity = " + String(humidity) + "%");
+  Serial.print("Temperature=" + String(temperature) + "|");
+  Serial.print("Pressure=" + String(pressure) + "|");
+  Serial.print("Altitude=" + String(altitude) + "|");
+  Serial.print("Humidity = " + String(humidity) + "");
   Serial.println();
 
-  Serial.print("MQ135 RZero: " + String(rzero));
-  Serial.print(" | Corrected RZero: " + String(correctedRZero));
-  Serial.print(" | Resistance: " + String(resistance));
-  Serial.print(" | PPM: " + String(ppm));
-  Serial.print(" | Corrected PPM: " + String(correctedPPM));
+  Serial.print("RZero=" + String(rzero) + "|");
+  Serial.print("CorrectedRZero=" + String(correctedRZero) + "|");
+  Serial.print("Resistance=" + String(resistance) + "|");
+  Serial.print("PPM=" + String(ppm) + "|");
+  Serial.print("CorrectedPPM=" + String(correctedPPM) + "");
+  Serial.println();
+
+  Serial.print("SoilHumidity=" + String(soilHumidity) + "");
   Serial.println();
 }
