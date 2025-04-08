@@ -3,17 +3,23 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <MQ135.h>
+#include <ph4502c_sensor.h>
+
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define humidityPin A3
+#define PH4502C_PH_LEVEL_PIN A0
+#define PH4502C_TEMP_PIN A1
 
 Adafruit_BME280 bme;
 MQ135 mq135_sensor(A2);
+PH4502C_Sensor ph4502(PH4502C_PH_LEVEL_PIN, PH4502C_TEMP_PIN);
 
 unsigned long delayTime;
 float temperature, humidity, pressure, altitude;
 float rzero, correctedRZero, resistance, ppm, correctedPPM;
 float soilHumidity;
+float pHLevel, temperature2;
 
 void setup() {
   Serial.begin(9600);
@@ -28,6 +34,7 @@ void setup() {
     while (1) delay(10);
   }
   pinMode(humidityPin,INPUT);
+  ph4502.init();
 
   Serial.println("-- Default Test --");
   delayTime = 1000;
@@ -55,6 +62,9 @@ void readValues() {
   correctedPPM = mq135_sensor.getCorrectedPPM(temperature, humidity);
 
   soilHumidity = (float)(1023 - analogRead(humidityPin))/1024*100;
+
+  pHLevel = ph4502.read_ph_level(); //read_ph_level_single()
+  temperature2 = ph4502.read_temp() - 687;
 }
 
 void printValues() {
@@ -71,6 +81,8 @@ void printValues() {
   Serial.print("CorrectedPPM=" + String(correctedPPM) + "");
   Serial.println();
 
-  Serial.print("SoilHumidity=" + String(soilHumidity) + "");
+  Serial.print("SoilHumidity=" + String(soilHumidity) + "|");
+  Serial.print("pHLevel=" + String(pHLevel) + "|");
+  Serial.print("Temperature2=" + String(temperature2) + "");
   Serial.println();
 }
