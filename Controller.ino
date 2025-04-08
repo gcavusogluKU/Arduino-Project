@@ -71,7 +71,7 @@ void printValues() {
   Serial.print("Temperature=" + String(temperature) + "|");
   Serial.print("Pressure=" + String(pressure) + "|");
   Serial.print("Altitude=" + String(altitude) + "|");
-  Serial.print("Humidity = " + String(humidity) + "");
+  Serial.print("Humidity=" + String(humidity) + "");
   Serial.println();
 
   Serial.print("RZero=" + String(rzero) + "|");
